@@ -12,7 +12,7 @@ def main():
 	english_path = 'training/hansards.36.2.e'
 	french_path = 'training/hansards.36.2.f'
 
-	ibm.read_data(english_path, french_path, null=True, UNK=True, max_sents=10000, test_repr=False)
+	ibm.read_data(english_path, french_path, null=True, UNK=True, max_sents=1000, test_repr=False)
  
 	Save = False
 
@@ -27,7 +27,7 @@ def main():
 		model_path 		= '../../models/IBM1/VI/{0}-'.format(step+1)
 		alignment_path 	= save_path + 'prediction-{0}'.format(step+1)
 
-		ibm.epoch_VI(alpha=1, log=True, ELBO=True)
+		ibm.epoch_VI(alpha=1, log=True, ELBO=False)
 
 		ibm.predict_alignment('validation/dev.f', 
 							  'validation/dev.e', 

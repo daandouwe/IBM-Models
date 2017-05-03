@@ -13,7 +13,7 @@ def main():
 	czech_path = 'czech/news-commentary-v9.cs-en.cs'
 
 
-	ibm.read_data(english_path, czech_path, null=True,  UNK=True, max_sents=20000, random_init=False, test_repr=False)
+	ibm.read_data(english_path, czech_path, null=True,  UNK=True, max_sents=1000, random_init=False, test_repr=False)
 	
 	# optional loading of 10 epochs pretrained translation matrix:
 	# ibm.load_t('../../models/IBM1/NULL/5-') (BAD PATH!)

@@ -13,7 +13,6 @@ def read_list(path):
 	f = open(path, 'r')
 	return [float(line.split('\n')[0]) for line in f]
 
-
 def plot_aer(aers, path):
 	plt.plot(range(len(aers)), aers)
 	plt.savefig(path + 'AER-plot.pdf')
@@ -76,9 +75,7 @@ def draw_alignment_null(naacl_path, french_path, english_path, fig_path, sure=Fa
 	
 	plt.savefig(fig_path)
 
-
-
-def draw_weighted_alignment_null(model, naacl_path, french_path, english_path, fig_path, sure=False, sentence=1):
+def draw_all_alignments(french_path, english_path, fig_path, sure=False, sentence=1):
 	"""
 	Draws an alignment that is weighted according to probs of alignment.
 	"""
@@ -97,42 +94,28 @@ def draw_weighted_alignment_null(model, naacl_path, french_path, english_path, f
 	english = ['NULL']+english
 	e.close()
 
-	n = open(naacl_path, 'r')
 	alignments = defaultdict(list)
-	line = n.readline()
-	while line[0] != str(sentence):
-		line = n.readline().split()
-	while line[0] != str(sentence+1):
-		if sure:
-			if line[-1] != 'P':
-				alignments[int(line[2])-1].append(int(line[1]))
-		else:
-			alignments[int(line[2])-1].append(int(line[1]))
-		line = n.readline().split()
 	
 	bitext = ([(french, english)], alignments)
 
 	fig = plt.figure(figsize=(8, 4))
 	ax = plt.axes()
 	plt.axis('off')
-	coordinates = get_coordinates(bitext)
+	coordinates = get_coordinates(bitext, draw_all=True)
 
-	# get weights of the edges:
-
-	F_indices = [model.V_f_indices[i] for i in french]
-	E_indices = [model.V_e_indices[i] for i in english]
 	raw_line_weights = []
 	
-	for i, e in enumerate(E_indices):
-		for f in F_indices:
-			try:
-				p = model.posterior(f, E_indices)[i]
-			except IndexError:
-				p = 0
-			raw_line_weights.append(p)
+	for j, f in enumerate(french):
+	# for i, e in enumerate(english):
+		for i, e in enumerate(english):
+		# for j, f in enumerate(french):
+			raw_line_weights.append(1./len(english))
 
+	# print(len(raw_line_weights))
 	line_weights = [w*10 for w in raw_line_weights]
+	print(line_weights)
 	edge_coords = coordinates['edges']
+	print(len(edge_coords))
 	lines = [ax.plot(xy[0], xy[1], alpha=0.9, linewidth=w, linestyle='-', color='#1a75ff', solid_capstyle='round')[0] for xy,w in zip(coordinates['edges'], line_weights)]
 
 
@@ -142,7 +125,81 @@ def draw_weighted_alignment_null(model, naacl_path, french_path, english_path, f
 	plot_words(ax, coordinates['x_f'], coordinates['y_f'], coordinates['w_f'], 'top')
 	plot_words(ax, coordinates['x_e'], coordinates['y_e'], coordinates['w_e'], 'bottom')
 	
-	plt.savefig(fig_path)
+	plt.savefig(fig_path + '.pdf')
+	plt.clf()
+
+def draw_weighted_alignment_null(model, naacl_path, french_path, english_path, fig_path, sure=False, sentence=1, all_ones=False):
+	"""
+	Draws an alignment that is weighted according to probs of alignment.
+	"""
+	i = 1
+	f = open(french_path, 'r')
+	while i <= sentence:
+		french = f.readline().split()
+		i += 1
+	f.close()
+	
+	i = 1
+	e = open(english_path, 'r')
+	while i <= sentence:
+		english = e.readline().split()
+		i += 1
+	english = ['NULL']+english
+	e.close()
+
+	alignments = defaultdict(list)
+
+	bitext = ([(french, english)], alignments)
+
+	fig = plt.figure(figsize=(8, 4))
+	ax = plt.axes()
+	plt.axis('off')
+	coordinates = get_coordinates(bitext, draw_all=True)
+
+	# get weights of the edges:
+
+	F_indices = []
+	for i in french:
+		try:
+			f = model.V_f_indices[i]
+		except KeyError:
+			f = model.V_f_indices['-UNK-']
+		F_indices.append(f)
+
+	E_indices = []
+	for i in english:
+		try:
+			e = model.V_e_indices[i]
+		except KeyError:
+			e = model.V_e_indices['-UNK-']
+		E_indices.append(e)
+
+	raw_line_weights = []
+	
+	for j, f in enumerate(F_indices):
+	# for i, e in enumerate(E_indices):
+		posterior = model.posterior(f, j, E_indices, F_indices)
+		for i, e in enumerate(E_indices):
+		# for j, f in enumerate(F_indices):
+			
+			p = posterior[i]
+			raw_line_weights.append(p)
+
+	print(len(raw_line_weights))
+	line_weights = [w*10 for w in raw_line_weights]
+	print(line_weights)
+	edge_coords = coordinates['edges']
+	print(len(edge_coords))
+	lines = [ax.plot(xy[0], xy[1], alpha=0.9, linewidth=w, linestyle='-', color='#1a75ff', solid_capstyle='round')[0] for xy,w in zip(coordinates['edges'], line_weights)]
+
+
+	ax.scatter(coordinates['x_f']+coordinates['x_e'], coordinates['y_f']+coordinates['y_e'],
+					s=30, c='white', marker='o', lw=0, alpha=1)
+
+	plot_words(ax, coordinates['x_f'], coordinates['y_f'], coordinates['w_f'], 'top')
+	plot_words(ax, coordinates['x_e'], coordinates['y_e'], coordinates['w_e'], 'bottom')
+	
+	plt.savefig(fig_path + '.pdf')
 	plt.clf()
 
 def draw_alignment(naacl_path, french_path, english_path, fig_path, sure=False, sentence=1):
@@ -192,7 +249,7 @@ def draw_alignment(naacl_path, french_path, english_path, fig_path, sure=False, 
 	plot_words(ax, coordinates['x_f'], coordinates['y_f'], coordinates['w_f'], 'top')
 	plot_words(ax, coordinates['x_e'], coordinates['y_e'], coordinates['w_e'], 'bottom')
 	
-	plt.savefig(fig_path)
+	plt.savefig(fig_path + '.pdf')
 
 
 
@@ -236,8 +293,24 @@ def draw_weighted_alignment(model, naacl_path, french_path, english_path, fig_pa
 
 	# get weights of the edges:
 
-	F_indices = [model.V_f_indices[i] for i in french]
-	E_indices = [model.V_e_indices[i] for i in english]
+	# F_indices = [model.V_f_indices[i] for i in french]
+	# E_indices = [model.V_e_indices[i] for i in english]
+	F_indices = []
+	for i in french:
+		try:
+			f = model.V_f_indices[i]
+		except KeyError:
+			f = model.V_f_indices['-UNK-']
+		F_indices.append(f)
+
+	E_indices = []
+	for i in english:
+		try:
+			e = model.V_e_indices[i]
+		except KeyError:
+			e = model.V_e_indices['-UNK-']
+		F_indices.append(e)
+	
 	raw_line_weights = []
 	
 	for i, e in enumerate(E_indices):
@@ -329,25 +402,4 @@ def get_coordinates(bitext, draw_all=False, one_sent=False, sent_index=0, word_i
 			'y_f': y_positions_f, 'y_e': y_positions_e,
 			'edges': edge_pos, 'w_f': words_f, 'w_e': words_e}
 	return coord_dict
-
-if __name__ == '__main__':
-	pass
-
-	# from IBM1 import IBM1
-	# ibm = IBM1()
-
-	# # english_path = '../training/hansards.36.2.e'
-	# # french_path = '../training/hansards.36.2.f'
-
-	# ibm.read_data(english_path, french_path, null=True, max_sents=np.inf, test_repr=False)
-
-	# ibm.load_t('../../../models/IBM1/NULL/9-')
-	# draw_weighted_alignment(ibm, '../prediction/validation/IBM1/dev-test', '../validation/dev.f', '../validation/dev.e', 'test-figure.png', sentence=21)
-
-	draw_alignment('../validation/dev.wa.nonullalign', '../validation/dev.f', '../validation/dev.e', 'test-fig', sure=False, sentence=21)
-	# draw_alignment('../prediction/validation/IBM1/non-NULL/10-iterations/prediction-10', '../validation/dev.f', '../validation/dev.e', 'test-fig', sentence=21)
-	# draw_alignment('../prediction/validation/IBM2/full/IBM1-init/prediction-5', '../validation/dev.f', '../validation/dev.e', 'test-fig', sentence=21)
-
-
-
 
