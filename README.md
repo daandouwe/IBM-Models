@@ -4,7 +4,7 @@ Implementation of the alignment models IBM 1 and IBM 2 for the UvA course NLP2. 
 See the [project description](project1.pdf) for more details, and the [final report](report/final-report.pdf) for our findings.
 
 ## Alignments
-See how the alignments change over 10 training epochs starting with uniform alignment probabilities. The width of the the line is proportional to its probability:
+See how the alignments change over 10 epochs of training. The width of each line is proportional to its probability, and we start with uniform alignment probabilities:
 
 ![sents0-4](sents/loaded/IBM2/uniform/sents-movie.gif)
 
