@@ -8,7 +8,7 @@ See how the alignments change over 10 epochs of training. The width of each line
 
 ![sents0-4](sents/loaded/IBM2/uniform/sents-movie.gif)
 
-These predictions are from an IBM model 2 running for 10 epochs, where each epoch is over the full 250k sentence dataset. We can see that the model predicts a perfect alignment at epoch 4. After this, the model unfortunately starts to wrongly align *le* to *program* instead of to the correct *the*.
+These predictions are from an IBM model 2 running for 10 epochs, where each epoch is over the full 250k sentence dataset. We can see that the model predicts a perfect alignment at epoch 4. After this, the model unfortunately starts to wrongly align *le* to *has* instead of to the correct *the*.
 
 The code is to produce these drawings is found in [util](lib/util.py). It was taken and adapted from a notebook in [this repository](https://github.com/INFR11133/lab1).
 
