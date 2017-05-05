@@ -1,5 +1,5 @@
 # IBM-Models
-Implementation of the alignment models IBM 1 and IBM 2 for the UvA course NLP2. Parameter estimation is performed using EM for the regular formulation of IBM 1 and 2, and Variational Inference for a Bayesian Formulation of IBM1. Joint work with [Fije van Overeem](https://github.com/Fije) and [Tim van Elsloo](https://github.com/elslooo).
+Implementation of the alignment models IBM 1 and IBM 2 for the UvA course [NLP2](https://uva-slpl.github.io/nlp2/). Parameter estimation is performed using EM for the regular formulation of IBM 1 and 2, and Variational Inference for a Bayesian Formulation of IBM1. Joint work with [Fije van Overeem](https://github.com/Fije) and [Tim van Elsloo](https://github.com/elslooo).
 
 See the [project description](project1.pdf) for more details, and the [final report](report/final-report.pdf) for our findings.
 
